@@ -1,8 +1,8 @@
-# AyushDB
+# MaanCache
 
 A Redis-inspired, thread-safe, in-memory key-value database written in modern C++20.
 
-AyushDB is a portfolio project built to explore low-level systems programming, modern C++ idioms, multithreaded synchronization, and performance benchmarking.
+MaanCache is a portfolio project built to explore low-level systems programming, modern C++ idioms, multithreaded synchronization, and performance benchmarking.
 
 ---
 
@@ -56,48 +56,48 @@ Tested on local machine across 100,000 operations per thread:
 
 ### Option 1: Direct Build with GCC
 ```bash
-g++ -O3 -std=c++20 -Iinclude src/main.cpp src/database.cpp src/command.cpp -o AyushDB.exe
-./AyushDB.exe
+g++ -O3 -std=c++20 -Iinclude src/main.cpp src/database.cpp src/command.cpp -o MaanCache.exe
+./MaanCache.exe
 ```
 
 ### Option 2: Build with CMake
 ```bash
 cmake -B build -S .
 cmake --build build --config Release
-./build/AyushDB.exe
+./build/MaanCache.exe
 ```
 
 ---
 
 ## Example Terminal Usage
 
-Launch `AyushDB.exe` to enter the interactive console:
+Launch `MaanCache.exe` to enter the interactive console:
 
 ```text
 ====================================================
-  AyushDB v1.0.0 (C++20 In-Memory Key-Value Store)  
+  MaanCache v1.0.0 (C++20 In-Memory Key-Value Store) 
   Type 'HELP' for commands, 'EXIT' to quit.         
 ====================================================
 
-ayushdb> SET user:100 Alice
+maancache> SET user:100 Alice
 OK
-ayushdb> GET user:100
+maancache> GET user:100
 "Alice"
-ayushdb> EXISTS user:100
+maancache> EXISTS user:100
 (integer) 1
-ayushdb> KEYS
+maancache> KEYS
 1) "user:100"
-ayushdb> DEL user:100
+maancache> DEL user:100
 (integer) 1
-ayushdb> GET user:100
+maancache> GET user:100
 (nil)
-ayushdb> EXIT
+maancache> EXIT
 Goodbye!
 ```
 
 To run the automated multithreaded benchmark suite:
 ```bash
-./AyushDB.exe --benchmark
+./MaanCache.exe --benchmark
 ```
 
 ---

@@ -32,9 +32,9 @@ void print_help() {
     std::cout << "  EXIT / QUIT         Exit the database shell\n";
 }
 
-void run_benchmark(ayushdb::Database& db) {
+void run_benchmark(maancache::Database& db) {
     std::cout << "\n====================================================\n";
-    std::cout << "       AyushDB Multithreaded Benchmark Suite        \n";
+    std::cout << "      MaanCache Multithreaded Benchmark Suite       \n";
     std::cout << "====================================================\n";
 
     const int total_keys_prefill = 10000;
@@ -56,7 +56,6 @@ void run_benchmark(ayushdb::Database& db) {
               << std::setw(18) << "Throughput (OPS)" << "\n";
     std::cout << "-------------------------------------------------------------------\n";
 
-    // 1. Read-Only Workload (100% GET)
     for (int num_threads : thread_counts) {
         std::vector<std::thread> threads;
         threads.reserve(num_threads);
@@ -90,7 +89,6 @@ void run_benchmark(ayushdb::Database& db) {
 
     std::cout << "-------------------------------------------------------------------\n";
 
-    // 2. Mixed Workload (80% READ / 20% WRITE)
     for (int num_threads : thread_counts) {
         std::vector<std::thread> threads;
         threads.reserve(num_threads);
@@ -133,7 +131,7 @@ void run_benchmark(ayushdb::Database& db) {
 }
 
 int main(int argc, char* argv[]) {
-    ayushdb::Database db;
+    maancache::Database db;
 
     if (argc > 1 && (std::string_view(argv[1]) == "--benchmark" || std::string_view(argv[1]) == "-b")) {
         run_benchmark(db);
@@ -141,13 +139,13 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "====================================================\n";
-    std::cout << "  AyushDB v1.0.0 (C++20 In-Memory Key-Value Store)  \n";
+    std::cout << "  MaanCache v1.0.0 (C++20 In-Memory Key-Value Store) \n";
     std::cout << "  Type 'BENCHMARK' to test throughput, 'EXIT' to quit.\n";
     std::cout << "====================================================\n\n";
 
     std::string line;
     while (true) {
-        std::cout << "ayushdb> ";
+        std::cout << "maancache> ";
         if (!std::getline(std::cin, line)) {
             break;
         }
@@ -157,9 +155,9 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
-        auto cmd = ayushdb::Command::parse(trimmed_line);
+        auto cmd = maancache::Command::parse(trimmed_line);
 
-        if (cmd.type == ayushdb::CommandType::UNKNOWN) {
+        if (cmd.type == maancache::CommandType::UNKNOWN) {
             std::string upper_line = trimmed_line;
             std::transform(upper_line.begin(), upper_line.end(), upper_line.begin(),
                            [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
@@ -181,7 +179,7 @@ int main(int argc, char* argv[]) {
         }
 
         switch (cmd.type) {
-            case ayushdb::CommandType::SET: {
+            case maancache::CommandType::SET: {
                 if (cmd.key.empty() || cmd.value.empty()) {
                     std::cout << "(error) ERR wrong number of arguments for 'SET' command\n";
                 } else {
@@ -190,7 +188,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case ayushdb::CommandType::GET: {
+            case maancache::CommandType::GET: {
                 if (cmd.key.empty()) {
                     std::cout << "(error) ERR wrong number of arguments for 'GET' command\n";
                 } else {
@@ -203,7 +201,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case ayushdb::CommandType::DEL: {
+            case maancache::CommandType::DEL: {
                 if (cmd.key.empty()) {
                     std::cout << "(error) ERR wrong number of arguments for 'DEL' command\n";
                 } else {
@@ -212,7 +210,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case ayushdb::CommandType::EXISTS: {
+            case maancache::CommandType::EXISTS: {
                 if (cmd.key.empty()) {
                     std::cout << "(error) ERR wrong number of arguments for 'EXISTS' command\n";
                 } else {
@@ -221,7 +219,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case ayushdb::CommandType::KEYS: {
+            case maancache::CommandType::KEYS: {
                 auto all_keys = db.keys();
                 if (all_keys.empty()) {
                     std::cout << "(empty list or set)\n";
@@ -232,11 +230,11 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case ayushdb::CommandType::SIZE: {
+            case maancache::CommandType::SIZE: {
                 std::cout << "(integer) " << db.size() << "\n";
                 break;
             }
-            case ayushdb::CommandType::CLEAR: {
+            case maancache::CommandType::CLEAR: {
                 db.clear();
                 std::cout << "OK\n";
                 break;

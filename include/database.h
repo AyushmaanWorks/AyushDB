@@ -1,5 +1,5 @@
-#ifndef AYUSHDB_DATABASE_H
-#define AYUSHDB_DATABASE_H
+#ifndef MAANCACHE_DATABASE_H
+#define MAANCACHE_DATABASE_H
 
 #include <string>
 #include <unordered_map>
@@ -8,7 +8,7 @@
 #include <shared_mutex>
 #include <cstddef>
 
-namespace ayushdb {
+namespace maancache {
 
 class Database {
 public:
@@ -31,6 +31,6 @@ private:
     mutable std::shared_mutex mutex;
 };
 
-} // namespace ayushdb
+} // namespace maancache
 
-#endif // AYUSHDB_DATABASE_H
+#endif // MAANCACHE_DATABASE_H

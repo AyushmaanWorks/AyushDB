@@ -3,7 +3,7 @@
 #include <cctype>
 #include <sstream>
 
-namespace ayushdb {
+namespace maancache {
 
 namespace {
     std::string to_upper(std::string_view sv) {
@@ -14,7 +14,7 @@ namespace {
     }
 }
 
-[[nodiscard]] CommandType Command::parse_type(std::string_view type_str) noexcept {
+CommandType Command::parse_type(std::string_view type_str) noexcept {
     const std::string name = to_upper(type_str);
     if (name == "SET")    return CommandType::SET;
     if (name == "GET")    return CommandType::GET;
@@ -26,7 +26,7 @@ namespace {
     return CommandType::UNKNOWN;
 }
 
-[[nodiscard]] std::string_view Command::type_to_string(CommandType type) noexcept {
+std::string_view Command::type_to_string(CommandType type) noexcept {
     switch (type) {
         case CommandType::SET:    return "SET";
         case CommandType::GET:    return "GET";
@@ -39,7 +39,7 @@ namespace {
     }
 }
 
-[[nodiscard]] Command Command::parse(std::string_view raw_command) {
+Command Command::parse(std::string_view raw_command) {
     Command cmd;
     std::string raw(raw_command);
     std::istringstream iss(raw);
@@ -69,7 +69,7 @@ namespace {
     return cmd;
 }
 
-[[nodiscard]] std::string Command::to_string() const {
+std::string Command::to_string() const {
     std::string result(type_to_string(type));
     if (!key.empty()) {
         result += " " + key;
@@ -80,4 +80,4 @@ namespace {
     return result;
 }
 
-} // namespace ayushdb
+} // namespace maancache
