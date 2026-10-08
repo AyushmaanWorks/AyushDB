@@ -2,7 +2,7 @@
 
 A Redis-inspired, thread-safe, in-memory key-value database written in modern C++20.
 
-AmonKV is a portfolio project built to explore low-level systems programming, modern C++ idioms, multithreaded synchronization, and performance benchmarking.
+AmonKV is a high-performance database engine built to explore low-level systems programming, modern C++ idioms, multithreaded synchronization, and throughput benchmarking.
 
 ---
 
@@ -54,13 +54,13 @@ Tested on local machine across 100,000 operations per thread:
 * C++20 compatible compiler (`g++` 10+, `clang++` 11+, or MSVC)
 * CMake 3.20+ (Optional)
 
-### Option 1: Direct Build with GCC
+### Direct Build with GCC
 ```bash
 g++ -O3 -std=c++20 -Iinclude src/main.cpp src/database.cpp src/command.cpp -o AmonKV.exe
 ./AmonKV.exe
 ```
 
-### Option 2: Build with CMake
+### Build with CMake
 ```bash
 cmake -B build -S .
 cmake --build build --config Release
@@ -99,17 +99,3 @@ To run the automated multithreaded benchmark suite:
 ```bash
 ./AmonKV.exe --benchmark
 ```
-
----
-
-## Future Roadmap
-
-- [ ] **Networking**: Add a multi-threaded TCP socket server to accept remote connections.
-- [ ] **RESP Protocol**: Parse Redis Wire Protocol (`*3\r\n$3\r\nSET...`) for `redis-cli` compatibility.
-- [ ] **Disk Persistence**: Implement Append-Only File (AOF) logging and snapshotting.
-- [ ] **TTL & Expiration**: Background thread for key expiration (`EXPIRE` command) and LRU cache eviction.
-
----
-
-## License
-This project is open-source under the MIT License.
