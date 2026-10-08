@@ -4,48 +4,48 @@
 
 namespace ayushdb {
 
-void Database::set(std::string_view key, std::string_view value) {
-    std::unique_lock lock(mutex_);
-    store_[std::string(key)] = std::string(value);
+void Database::set(const std::string& key, const std::string& value) {
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    store[key] = value;
 }
 
-[[nodiscard]] std::optional<std::string> Database::get(std::string_view key) const {
-    std::shared_lock lock(mutex_);
-    const auto it = store_.find(std::string(key));
-    if (it != store_.end()) {
+std::optional<std::string> Database::get(const std::string& key) const {
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    auto it = store.find(key);
+    if (it != store.end()) {
         return it->second;
     }
     return std::nullopt;
 }
 
-bool Database::del(std::string_view key) {
-    std::unique_lock lock(mutex_);
-    return store_.erase(std::string(key)) > 0;
+bool Database::del(const std::string& key) {
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    return store.erase(key) > 0;
 }
 
-[[nodiscard]] bool Database::exists(std::string_view key) const {
-    std::shared_lock lock(mutex_);
-    return store_.contains(std::string(key));
+bool Database::exists(const std::string& key) const {
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    return store.contains(key);
 }
 
-[[nodiscard]] std::vector<std::string> Database::keys() const {
-    std::shared_lock lock(mutex_);
+std::vector<std::string> Database::keys() const {
+    std::shared_lock<std::shared_mutex> lock(mutex);
     std::vector<std::string> result;
-    result.reserve(store_.size());
-    for (const auto& [k, v] : store_) {
+    result.reserve(store.size());
+    for (const auto& [k, v] : store) {
         result.push_back(k);
     }
     return result;
 }
 
-[[nodiscard]] std::size_t Database::size() const {
-    std::shared_lock lock(mutex_);
-    return store_.size();
+std::size_t Database::size() const {
+    std::shared_lock<std::shared_mutex> lock(mutex);
+    return store.size();
 }
 
 void Database::clear() {
-    std::unique_lock lock(mutex_);
-    store_.clear();
+    std::unique_lock<std::shared_mutex> lock(mutex);
+    store.clear();
 }
 
 } // namespace ayushdb
