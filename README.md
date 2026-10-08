@@ -1,15 +1,15 @@
-# AyushDB 🚀
+# AyushDB
 
-A Redis-inspired, thread-safe, in-memory key-value database written in modern **C++20**. 
+A Redis-inspired, thread-safe, in-memory key-value database written in modern C++20.
 
 AyushDB is a portfolio project built to explore low-level systems programming, modern C++ idioms, multithreaded synchronization, and performance benchmarking.
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
-* **Thread-Safe Core Engine**: Uses a **Multiple Readers / Single Writer (MRSW)** concurrency model via `std::shared_mutex`.
-* **$O(1)$ Hash Map Storage**: Backed by `std::unordered_map` for fast key-value lookups.
+* **Thread-Safe Core Engine**: Uses a Multiple Readers / Single Writer (MRSW) concurrency model via `std::shared_mutex`.
+* **O(1) Hash Map Storage**: Backed by `std::unordered_map` for fast key-value lookups.
 * **Core Key-Value Operations**:
   * `SET(key, value)` — Store or update a string value.
   * `GET(key)` — Retrieve value as `std::optional<std::string>`.
@@ -23,7 +23,7 @@ AyushDB is a portfolio project built to explore low-level systems programming, m
 
 ---
 
-## 📐 Architecture & Design Choices
+## Architecture & Design Choices
 
 ### 1. Reader-Writer Lock Synchronization (`std::shared_mutex`)
 In typical key-value workloads, read requests (`GET`, `EXISTS`, `KEYS`, `SIZE`) far outnumber write requests (`SET`, `DEL`, `CLEAR`). 
@@ -35,7 +35,7 @@ In typical key-value workloads, read requests (`GET`, `EXISTS`, `KEYS`, `SIZE`) 
 
 ---
 
-## ⚡ Performance Benchmarks
+## Performance Benchmarks
 
 Tested on local machine across 100,000 operations per thread:
 
@@ -48,7 +48,7 @@ Tested on local machine across 100,000 operations per thread:
 
 ---
 
-## 🛠️ Building & Running
+## Building & Running
 
 ### Prerequisites
 * C++20 compatible compiler (`g++` 10+, `clang++` 11+, or MSVC)
@@ -69,7 +69,7 @@ cmake --build build --config Release
 
 ---
 
-## 💻 Example Terminal Usage
+## Example Terminal Usage
 
 Launch `AyushDB.exe` to enter the interactive console:
 
@@ -102,7 +102,7 @@ To run the automated multithreaded benchmark suite:
 
 ---
 
-## 🛣️ Future Roadmap
+## Future Roadmap
 
 - [ ] **Networking**: Add a multi-threaded TCP socket server to accept remote connections.
 - [ ] **RESP Protocol**: Parse Redis Wire Protocol (`*3\r\n$3\r\nSET...`) for `redis-cli` compatibility.
@@ -111,5 +111,5 @@ To run the automated multithreaded benchmark suite:
 
 ---
 
-## 📝 License
+## License
 This project is open-source under the MIT License.
