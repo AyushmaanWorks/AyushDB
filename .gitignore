@@ -1,0 +1,15 @@
+# Build binaries & object files
+*.exe
+*.o
+*.obj
+*.pdb
+*.ilk
+
+# Build directories
+build/
+bin/
+out/
+
+# IDE files
+.vscode/
+.idea/
