@@ -1,82 +1,149 @@
 #include "database.h"
 #include "command.h"
 #include <iostream>
-#include <vector>
-#include <thread>
-#include <chrono>
+#include <string>
+#include <algorithm>
+#include <cctype>
 
-int main() {
-    std::cout << "AyushDB Core Engine Demo\n";
-    std::cout << "------------------------\n";
+namespace {
+    std::string trim(std::string_view s) {
+        auto start = s.find_first_not_of(" \t\r\n");
+        if (start == std::string_view::npos) return "";
+        auto end = s.find_last_not_of(" \t\r\n");
+        return std::string(s.substr(start, end - start + 1));
+    }
+}
 
+void print_help() {
+    std::cout << "Available Commands:\n";
+    std::cout << "  SET <key> <value>   Set key to hold string value\n";
+    std::cout << "  GET <key>           Get value of key\n";
+    std::cout << "  DEL <key>           Delete key\n";
+    std::cout << "  EXISTS <key>        Determine if a key exists\n";
+    std::cout << "  KEYS                Get all keys in the database\n";
+    std::cout << "  SIZE                Return number of keys\n";
+    std::cout << "  CLEAR               Delete all keys\n";
+    std::cout << "  HELP                Show this help message\n";
+    std::cout << "  EXIT / QUIT         Exit the database shell\n";
+}
+
+int main(int argc, char* argv[]) {
     ayushdb::Database db;
 
-    // Basic Database Operations
-    db.set("user:100", "Alice");
-    db.set("user:101", "Bob");
-    db.set("session:xyz", "active");
-
-    std::cout << "SIZE: " << db.size() << "\n";
-    std::cout << "EXISTS('user:100'): " << (db.exists("user:100") ? "true" : "false") << "\n";
-
-    if (auto val = db.get("user:100"); val.has_value()) {
-        std::cout << "GET('user:100'): " << val.value() << "\n";
-    }
-
-    std::cout << "KEYS: ";
-    for (const auto& k : db.keys()) {
-        std::cout << k << " ";
-    }
-    std::cout << "\n";
-
-    db.del("session:xyz");
-    std::cout << "DEL('session:xyz') -> New SIZE: " << db.size() << "\n\n";
-
-    // Command Parsing Demo
-    std::vector<std::string> test_commands = {
-        "SET counter 42",
-        "GET counter",
-        "EXISTS counter",
-        "KEYS",
-        "SIZE",
-        "DEL counter",
-        "CLEAR"
-    };
-
-    std::cout << "Command Parser Output:\n";
-    for (const auto& raw : test_commands) {
-        auto cmd = ayushdb::Command::parse(raw);
-        std::cout << "  Raw: \"" << raw << "\" -> Parsed Type: " 
-                  << ayushdb::Command::type_to_string(cmd.type) << "\n";
-    }
-
-    std::cout << "\nConcurrent Multi-Reader Single-Writer Test:\n";
-    std::thread writer([&db]() {
-        for (int i = 0; i < 20; ++i) {
-            db.set("k_" + std::to_string(i), "v_" + std::to_string(i));
-            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    if (argc > 1 && std::string_view(argv[1]) == "--demo") {
+        std::cout << "Running AyushDB Demo Mode...\n";
+        db.set("user:100", "Alice");
+        db.set("user:101", "Bob");
+        std::cout << "SIZE: " << db.size() << "\n";
+        if (auto val = db.get("user:100"); val) {
+            std::cout << "GET user:100 -> " << *val << "\n";
         }
-    });
+        return 0;
+    }
 
-    auto reader = [&db](int id) {
-        for (int i = 0; i < 10; ++i) {
-            [[maybe_unused]] auto k = db.keys();
-            [[maybe_unused]] auto s = db.size();
-            std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    std::cout << "====================================================\n";
+    std::cout << "  AyushDB v1.0.0 (C++20 In-Memory Key-Value Store)  \n";
+    std::cout << "  Type 'HELP' for commands, 'EXIT' to quit.         \n";
+    std::cout << "====================================================\n\n";
+
+    std::string line;
+    while (true) {
+        std::cout << "ayushdb> ";
+        if (!std::getline(std::cin, line)) {
+            break;
         }
-        std::cout << "  Reader " << id << " completed.\n";
-    };
 
-    std::thread r1(reader, 1);
-    std::thread r2(reader, 2);
+        std::string trimmed_line = trim(line);
+        if (trimmed_line.empty()) {
+            continue;
+        }
 
-    writer.join();
-    r1.join();
-    r2.join();
+        auto cmd = ayushdb::Command::parse(trimmed_line);
 
-    std::cout << "Final Database Size: " << db.size() << "\n";
-    db.clear();
-    std::cout << "Cleared Database Size: " << db.size() << "\n";
+        if (cmd.type == ayushdb::CommandType::UNKNOWN) {
+            std::string upper_line = trimmed_line;
+            std::transform(upper_line.begin(), upper_line.end(), upper_line.begin(),
+                           [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
+
+            if (upper_line == "EXIT" || upper_line == "QUIT") {
+                std::cout << "Goodbye!\n";
+                break;
+            }
+            if (upper_line == "HELP") {
+                print_help();
+                continue;
+            }
+            std::cout << "(error) ERR unknown command '" << trimmed_line << "'\n";
+            continue;
+        }
+
+        switch (cmd.type) {
+            case ayushdb::CommandType::SET: {
+                if (cmd.key.empty() || cmd.value.empty()) {
+                    std::cout << "(error) ERR wrong number of arguments for 'SET' command\n";
+                } else {
+                    db.set(cmd.key, cmd.value);
+                    std::cout << "OK\n";
+                }
+                break;
+            }
+            case ayushdb::CommandType::GET: {
+                if (cmd.key.empty()) {
+                    std::cout << "(error) ERR wrong number of arguments for 'GET' command\n";
+                } else {
+                    auto res = db.get(cmd.key);
+                    if (res.has_value()) {
+                        std::cout << "\"" << res.value() << "\"\n";
+                    } else {
+                        std::cout << "(nil)\n";
+                    }
+                }
+                break;
+            }
+            case ayushdb::CommandType::DEL: {
+                if (cmd.key.empty()) {
+                    std::cout << "(error) ERR wrong number of arguments for 'DEL' command\n";
+                } else {
+                    bool removed = db.del(cmd.key);
+                    std::cout << (removed ? "(integer) 1\n" : "(integer) 0\n");
+                }
+                break;
+            }
+            case ayushdb::CommandType::EXISTS: {
+                if (cmd.key.empty()) {
+                    std::cout << "(error) ERR wrong number of arguments for 'EXISTS' command\n";
+                } else {
+                    bool found = db.exists(cmd.key);
+                    std::cout << (found ? "(integer) 1\n" : "(integer) 0\n");
+                }
+                break;
+            }
+            case ayushdb::CommandType::KEYS: {
+                auto all_keys = db.keys();
+                if (all_keys.empty()) {
+                    std::cout << "(empty list or set)\n";
+                } else {
+                    for (std::size_t i = 0; i < all_keys.size(); ++i) {
+                        std::cout << (i + 1) << ") \"" << all_keys[i] << "\"\n";
+                    }
+                }
+                break;
+            }
+            case ayushdb::CommandType::SIZE: {
+                std::cout << "(integer) " << db.size() << "\n";
+                break;
+            }
+            case ayushdb::CommandType::CLEAR: {
+                db.clear();
+                std::cout << "OK\n";
+                break;
+            }
+            default: {
+                std::cout << "(error) ERR unknown command '" << trimmed_line << "'\n";
+                break;
+            }
+        }
+    }
 
     return 0;
 }
