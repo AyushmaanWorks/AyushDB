@@ -2,8 +2,12 @@
 #include "command.h"
 #include <iostream>
 #include <string>
+#include <vector>
+#include <thread>
+#include <chrono>
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 
 namespace {
     std::string trim(std::string_view s) {
@@ -23,27 +27,122 @@ void print_help() {
     std::cout << "  KEYS                Get all keys in the database\n";
     std::cout << "  SIZE                Return number of keys\n";
     std::cout << "  CLEAR               Delete all keys\n";
+    std::cout << "  BENCHMARK           Run multithreaded performance benchmark\n";
     std::cout << "  HELP                Show this help message\n";
     std::cout << "  EXIT / QUIT         Exit the database shell\n";
+}
+
+void run_benchmark(ayushdb::Database& db) {
+    std::cout << "\n====================================================\n";
+    std::cout << "       AyushDB Multithreaded Benchmark Suite        \n";
+    std::cout << "====================================================\n";
+
+    const int total_keys_prefill = 10000;
+    std::cout << "Prefilling database with " << total_keys_prefill << " key-value pairs...\n";
+    db.clear();
+    for (int i = 0; i < total_keys_prefill; ++i) {
+        db.set("bench_key_" + std::to_string(i), "bench_val_" + std::to_string(i));
+    }
+
+    const std::vector<int> thread_counts = {1, 2, 4, 8, 16};
+    const int ops_per_thread = 100000;
+
+    std::cout << "\nRunning Benchmark Tests (" << ops_per_thread << " ops/thread):\n";
+    std::cout << "-------------------------------------------------------------------\n";
+    std::cout << std::left << std::setw(10) << "Workload" 
+              << std::setw(10) << "Threads" 
+              << std::setw(14) << "Total Ops" 
+              << std::setw(14) << "Time (ms)" 
+              << std::setw(18) << "Throughput (OPS)" << "\n";
+    std::cout << "-------------------------------------------------------------------\n";
+
+    // 1. Read-Only Workload (100% GET)
+    for (int num_threads : thread_counts) {
+        std::vector<std::thread> threads;
+        threads.reserve(num_threads);
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        for (int t = 0; t < num_threads; ++t) {
+            threads.emplace_back([&db, ops_per_thread, t]() {
+                for (int i = 0; i < ops_per_thread; ++i) {
+                    int key_idx = (t * ops_per_thread + i) % 10000;
+                    [[maybe_unused]] auto res = db.get("bench_key_" + std::to_string(key_idx));
+                }
+            });
+        }
+
+        for (auto& th : threads) {
+            th.join();
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        double elapsed_ms = std::chrono::duration<double, std::milli>(end - start).count();
+        long long total_ops = static_cast<long long>(num_threads) * ops_per_thread;
+        double ops_per_sec = (total_ops / (elapsed_ms / 1000.0));
+
+        std::cout << std::left << std::setw(10) << "100% READ" 
+                  << std::setw(10) << num_threads 
+                  << std::setw(14) << total_ops 
+                  << std::setw(14) << std::fixed << std::setprecision(2) << elapsed_ms 
+                  << std::setw(18) << std::fixed << std::setprecision(0) << ops_per_sec << "\n";
+    }
+
+    std::cout << "-------------------------------------------------------------------\n";
+
+    // 2. Mixed Workload (80% READ / 20% WRITE)
+    for (int num_threads : thread_counts) {
+        std::vector<std::thread> threads;
+        threads.reserve(num_threads);
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        for (int t = 0; t < num_threads; ++t) {
+            threads.emplace_back([&db, ops_per_thread, t]() {
+                for (int i = 0; i < ops_per_thread; ++i) {
+                    int key_idx = (t * ops_per_thread + i) % 10000;
+                    std::string key = "bench_key_" + std::to_string(key_idx);
+                    if (i % 5 == 0) {
+                        db.set(key, "updated_val");
+                    } else {
+                        [[maybe_unused]] auto res = db.get(key);
+                    }
+                }
+            });
+        }
+
+        for (auto& th : threads) {
+            th.join();
+        }
+
+        auto end = std::chrono::high_resolution_clock::now();
+        double elapsed_ms = std::chrono::duration<double, std::milli>(end - start).count();
+        long long total_ops = static_cast<long long>(num_threads) * ops_per_thread;
+        double ops_per_sec = (total_ops / (elapsed_ms / 1000.0));
+
+        std::cout << std::left << std::setw(10) << "80/20 MIXED" 
+                  << std::setw(10) << num_threads 
+                  << std::setw(14) << total_ops 
+                  << std::setw(14) << std::fixed << std::setprecision(2) << elapsed_ms 
+                  << std::setw(18) << std::fixed << std::setprecision(0) << ops_per_sec << "\n";
+    }
+
+    std::cout << "-------------------------------------------------------------------\n";
+    std::cout << "Benchmark Complete! Final DB Size: " << db.size() << "\n";
+    std::cout << "====================================================\n\n";
 }
 
 int main(int argc, char* argv[]) {
     ayushdb::Database db;
 
-    if (argc > 1 && std::string_view(argv[1]) == "--demo") {
-        std::cout << "Running AyushDB Demo Mode...\n";
-        db.set("user:100", "Alice");
-        db.set("user:101", "Bob");
-        std::cout << "SIZE: " << db.size() << "\n";
-        if (auto val = db.get("user:100"); val) {
-            std::cout << "GET user:100 -> " << *val << "\n";
-        }
+    if (argc > 1 && (std::string_view(argv[1]) == "--benchmark" || std::string_view(argv[1]) == "-b")) {
+        run_benchmark(db);
         return 0;
     }
 
     std::cout << "====================================================\n";
     std::cout << "  AyushDB v1.0.0 (C++20 In-Memory Key-Value Store)  \n";
-    std::cout << "  Type 'HELP' for commands, 'EXIT' to quit.         \n";
+    std::cout << "  Type 'BENCHMARK' to test throughput, 'EXIT' to quit.\n";
     std::cout << "====================================================\n\n";
 
     std::string line;
@@ -71,6 +170,10 @@ int main(int argc, char* argv[]) {
             }
             if (upper_line == "HELP") {
                 print_help();
+                continue;
+            }
+            if (upper_line == "BENCHMARK") {
+                run_benchmark(db);
                 continue;
             }
             std::cout << "(error) ERR unknown command '" << trimmed_line << "'\n";
