@@ -32,9 +32,9 @@ void print_help() {
     std::cout << "  EXIT / QUIT         Exit the database shell\n";
 }
 
-void run_benchmark(maancache::Database& db) {
+void run_benchmark(amonkv::Database& db) {
     std::cout << "\n====================================================\n";
-    std::cout << "      MaanCache Multithreaded Benchmark Suite       \n";
+    std::cout << "       AmonKV Multithreaded Benchmark Suite         \n";
     std::cout << "====================================================\n";
 
     const int total_keys_prefill = 10000;
@@ -131,7 +131,7 @@ void run_benchmark(maancache::Database& db) {
 }
 
 int main(int argc, char* argv[]) {
-    maancache::Database db;
+    amonkv::Database db;
 
     if (argc > 1 && (std::string_view(argv[1]) == "--benchmark" || std::string_view(argv[1]) == "-b")) {
         run_benchmark(db);
@@ -139,13 +139,13 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "====================================================\n";
-    std::cout << "  MaanCache v1.0.0 (C++20 In-Memory Key-Value Store) \n";
+    std::cout << "  AmonKV v1.0.0 (C++20 In-Memory Key-Value Store)   \n";
     std::cout << "  Type 'BENCHMARK' to test throughput, 'EXIT' to quit.\n";
     std::cout << "====================================================\n\n";
 
     std::string line;
     while (true) {
-        std::cout << "maancache> ";
+        std::cout << "amonkv> ";
         if (!std::getline(std::cin, line)) {
             break;
         }
@@ -155,9 +155,9 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
-        auto cmd = maancache::Command::parse(trimmed_line);
+        auto cmd = amonkv::Command::parse(trimmed_line);
 
-        if (cmd.type == maancache::CommandType::UNKNOWN) {
+        if (cmd.type == amonkv::CommandType::UNKNOWN) {
             std::string upper_line = trimmed_line;
             std::transform(upper_line.begin(), upper_line.end(), upper_line.begin(),
                            [](unsigned char c) { return static_cast<char>(std::toupper(c)); });
@@ -179,7 +179,7 @@ int main(int argc, char* argv[]) {
         }
 
         switch (cmd.type) {
-            case maancache::CommandType::SET: {
+            case amonkv::CommandType::SET: {
                 if (cmd.key.empty() || cmd.value.empty()) {
                     std::cout << "(error) ERR wrong number of arguments for 'SET' command\n";
                 } else {
@@ -188,7 +188,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case maancache::CommandType::GET: {
+            case amonkv::CommandType::GET: {
                 if (cmd.key.empty()) {
                     std::cout << "(error) ERR wrong number of arguments for 'GET' command\n";
                 } else {
@@ -201,7 +201,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case maancache::CommandType::DEL: {
+            case amonkv::CommandType::DEL: {
                 if (cmd.key.empty()) {
                     std::cout << "(error) ERR wrong number of arguments for 'DEL' command\n";
                 } else {
@@ -210,7 +210,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case maancache::CommandType::EXISTS: {
+            case amonkv::CommandType::EXISTS: {
                 if (cmd.key.empty()) {
                     std::cout << "(error) ERR wrong number of arguments for 'EXISTS' command\n";
                 } else {
@@ -219,7 +219,7 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case maancache::CommandType::KEYS: {
+            case amonkv::CommandType::KEYS: {
                 auto all_keys = db.keys();
                 if (all_keys.empty()) {
                     std::cout << "(empty list or set)\n";
@@ -230,11 +230,11 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             }
-            case maancache::CommandType::SIZE: {
+            case amonkv::CommandType::SIZE: {
                 std::cout << "(integer) " << db.size() << "\n";
                 break;
             }
-            case maancache::CommandType::CLEAR: {
+            case amonkv::CommandType::CLEAR: {
                 db.clear();
                 std::cout << "OK\n";
                 break;

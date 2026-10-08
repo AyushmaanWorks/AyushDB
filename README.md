@@ -1,8 +1,8 @@
-# MaanCache
+# AmonKV (Ayush Memory-Optimized Node)
 
 A Redis-inspired, thread-safe, in-memory key-value database written in modern C++20.
 
-MaanCache is a portfolio project built to explore low-level systems programming, modern C++ idioms, multithreaded synchronization, and performance benchmarking.
+AmonKV is a portfolio project built to explore low-level systems programming, modern C++ idioms, multithreaded synchronization, and performance benchmarking.
 
 ---
 
@@ -56,48 +56,48 @@ Tested on local machine across 100,000 operations per thread:
 
 ### Option 1: Direct Build with GCC
 ```bash
-g++ -O3 -std=c++20 -Iinclude src/main.cpp src/database.cpp src/command.cpp -o MaanCache.exe
-./MaanCache.exe
+g++ -O3 -std=c++20 -Iinclude src/main.cpp src/database.cpp src/command.cpp -o AmonKV.exe
+./AmonKV.exe
 ```
 
 ### Option 2: Build with CMake
 ```bash
 cmake -B build -S .
 cmake --build build --config Release
-./build/MaanCache.exe
+./build/AmonKV.exe
 ```
 
 ---
 
 ## Example Terminal Usage
 
-Launch `MaanCache.exe` to enter the interactive console:
+Launch `AmonKV.exe` to enter the interactive console:
 
 ```text
 ====================================================
-  MaanCache v1.0.0 (C++20 In-Memory Key-Value Store) 
+  AmonKV v1.0.0 (C++20 In-Memory Key-Value Store)   
   Type 'HELP' for commands, 'EXIT' to quit.         
 ====================================================
 
-maancache> SET user:100 Alice
+amonkv> SET user:100 Alice
 OK
-maancache> GET user:100
+amonkv> GET user:100
 "Alice"
-maancache> EXISTS user:100
+amonkv> EXISTS user:100
 (integer) 1
-maancache> KEYS
+amonkv> KEYS
 1) "user:100"
-maancache> DEL user:100
+amonkv> DEL user:100
 (integer) 1
-maancache> GET user:100
+amonkv> GET user:100
 (nil)
-maancache> EXIT
+amonkv> EXIT
 Goodbye!
 ```
 
 To run the automated multithreaded benchmark suite:
 ```bash
-./MaanCache.exe --benchmark
+./AmonKV.exe --benchmark
 ```
 
 ---

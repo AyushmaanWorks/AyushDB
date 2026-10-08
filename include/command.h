@@ -1,12 +1,12 @@
-#ifndef MAANCACHE_COMMAND_H
-#define MAANCACHE_COMMAND_H
+#ifndef AMONKV_COMMAND_H
+#define AMONKV_COMMAND_H
 
 #include <string>
 #include <string_view>
 #include <vector>
 #include <cstdint>
 
-namespace maancache {
+namespace amonkv {
 
 enum class CommandType : std::uint8_t {
     SET,
@@ -31,6 +31,6 @@ struct Command {
     std::string to_string() const;
 };
 
-} // namespace maancache
+} // namespace amonkv
 
-#endif // MAANCACHE_COMMAND_H
+#endif // AMONKV_COMMAND_H

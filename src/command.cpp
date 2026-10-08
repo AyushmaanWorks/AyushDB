@@ -3,7 +3,7 @@
 #include <cctype>
 #include <sstream>
 
-namespace maancache {
+namespace amonkv {
 
 namespace {
     std::string to_upper(std::string_view sv) {
@@ -80,4 +80,4 @@ std::string Command::to_string() const {
     return result;
 }
 
-} // namespace maancache
+} // namespace amonkv

@@ -1,5 +1,5 @@
-#ifndef MAANCACHE_DATABASE_H
-#define MAANCACHE_DATABASE_H
+#ifndef AMONKV_DATABASE_H
+#define AMONKV_DATABASE_H
 
 #include <string>
 #include <unordered_map>
@@ -8,7 +8,7 @@
 #include <shared_mutex>
 #include <cstddef>
 
-namespace maancache {
+namespace amonkv {
 
 class Database {
 public:
@@ -31,6 +31,6 @@ private:
     mutable std::shared_mutex mutex;
 };
 
-} // namespace maancache
+} // namespace amonkv
 
-#endif // MAANCACHE_DATABASE_H
+#endif // AMONKV_DATABASE_H
